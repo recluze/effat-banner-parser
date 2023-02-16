@@ -7,7 +7,9 @@ Setup your banner username and password in `settings.py`
 
 ![Settings file](imgs/00.png)
 
+Add all offered courses for the next semester in `courses.txt` (one course per line)
 
+![Courses file](imgs/05.png)
 
 Add Student IDs of users (S1111122222 format) in `ids.txt` (one ID per line) 
 
