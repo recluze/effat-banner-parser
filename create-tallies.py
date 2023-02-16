@@ -46,10 +46,12 @@ def make_id_course_map(lines):
         # if course_type[0] == 'G': 
         #     course_type = course_type[0] + " " + course_type[1:]
 
-        course_full_name = course_type.ljust(5)
-        course_full_name += course_code.ljust(6)
-        course_full_name += course_name.ljust(33)
-        course_data = [course_full_name, course_grade]
+        course_full_name_formatted = course_type.ljust(5)
+        course_full_name_formatted += course_code.ljust(6)
+        course_full_name_formatted += course_name.ljust(33)
+        course_full_name = course_type + course_code + ": " + course_name
+        
+        course_data = [course_full_name, course_grade, course_full_name_formatted]
         if student_id not in id_courses_map: 
             id_courses_map[student_id] = [course_data]
         else: 
@@ -70,6 +72,7 @@ def single_student_courses(student_id):
     print()
     print("-----------------------------------------------------\n")
     print("Details for: ", student_id, " - ", id_name_map[student_id])
+    
     print()
 
     # first output courses already taken 
@@ -78,11 +81,12 @@ def single_student_courses(student_id):
     for sc in student_courses: 
         course_name = sc[0]
         course_grade = sc[1]
+        course_fullname = sc[2]
 
         if course_grade == 'F': 
             course_grade = 'F  <---'
         if course_grade != 'None': 
-            print(sc[0].ljust(40), course_grade)
+            print(course_fullname, course_grade)
             count += 1
     print ("\nTotal: " + str(count) + "\n")
 
@@ -92,8 +96,10 @@ def single_student_courses(student_id):
     for sc in student_courses: 
         course_name = sc[0]
         course_grade = sc[1]
+        course_fullname = sc[2]
+
         if course_grade == 'None': 
-            print(sc[0])
+            print(course_fullname)
             count += 1
     print ("\nTotal: " + str(count) + "\n")
 
