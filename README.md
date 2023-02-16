@@ -2,7 +2,7 @@ Effat Banner Parser for Tallies
 
 Install requirements through `pip install lxml pyyaml` 
 
-Setup your banner username and password in `settings.py`
+Setup your banner username and password in `settings.yaml`
 
 
 ![Settings file](imgs/00.png)
