@@ -1,0 +1,16 @@
+CS1001: Introduction to Computing
+CS1021: Computer Arch. & Organization
+CS1131: Advanced Programming
+CS2011: Data Structures & Algorithms
+CS2111: Web Application Development
+CS2171: Ethics in Computing
+CS3067: Information and Cyber Security
+CS3133: Programming Languages
+CS3151: Software Engineering
+CS4174: Senior Project 1
+CS4175: Senior Project 2
+GCS182: Principles of Computing
+CS4166: Robotics
+CS4073: Analyzing and Visualizing Data
+CS3063: Web Security
+CS3061: Computer Network Security
