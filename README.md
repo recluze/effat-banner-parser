@@ -13,7 +13,7 @@ Add all offered courses for the next semester in `courses.txt` (one course per l
 
 Add Student IDs of users (S1111122222 format) in `ids.txt` (one ID per line) 
 
-Run the banner parser through `python banner-transcript.py ids.txt`
+Run the banner parser through `python banner-transcripts.py ids.txt`
 
 ![Banner Parser](imgs/01.png)
 
