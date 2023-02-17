@@ -8,12 +8,16 @@ pp = pprint.PrettyPrinter(depth=4)
 
 output_dir = "output"
 course_list_file = "courses.txt"
+output_plain = False 
 
 id_list = set() 
 id_name_map = {} 
 id_courses_map = {} 
 course_list = [] 
 
+def get_plan_formatted_course_name(course_name): 
+    course_type, course_num, course_name = separate_number_chars(course_name) 
+    return course_type + " " + course_num
 
 def separate_number_chars(s):
     regex = r"([A-Z]+)(\d+[A-Z]?):(.*)"
@@ -106,7 +110,10 @@ def single_student_courses(student_id):
         if course_grade == 'F': 
             course_grade = 'F  <---'
         if course_grade != 'None': 
-            print(course_fullname, course_grade)
+            if output_plain: 
+                print(get_plan_formatted_course_name(course_name))
+            else: 
+                print(course_fullname, course_grade)
             count += 1
     print ("\nTotal: " + str(count) + "\n")
 
@@ -119,7 +126,10 @@ def single_student_courses(student_id):
         course_fullname = sc[2]
 
         if course_grade == 'None': 
-            print(course_fullname)
+            if output_plain: 
+                print(get_plan_formatted_course_name(course_name))
+            else:
+                print(course_fullname)
             count += 1
     print ("\nTotal: " + str(count) + "\n")
 
@@ -181,5 +191,11 @@ def create_tallies(infile, student_id):
     
 if __name__ == "__main__": 
     student_id = sys.argv[1]
+
+    try: 
+        output_plain = sys.argv[2] == 'plain'
+    except IndexError: 
+        pass 
+
     infile = os.path.join(output_dir, "combined.csv")
     create_tallies(infile, student_id)     
