@@ -1,5 +1,6 @@
 import os 
 import logging 
+import re 
 import sys
 import pprint
 pp = pprint.PrettyPrinter(depth=4)
@@ -12,6 +13,20 @@ id_list = set()
 id_name_map = {} 
 id_courses_map = {} 
 course_list = [] 
+
+
+def separate_number_chars(s):
+    regex = r"([A-Z]+)(\d+[A-Z]?):(.*)"
+    match = re.search(regex, s) 
+    
+    if match != None: 
+        course_type = match.group(1)
+        course_num = match.group(2)
+        course_name = match.group(3)
+        return [course_type, course_num, course_name]
+    else: 
+        print("Bad course name:", s)
+        sys.exit(1)
 
 
 def get_course_list(): 
@@ -65,8 +80,13 @@ def make_id_course_map(lines):
 # ------------
 
 def single_student_courses(student_id): 
-    student_courses = id_courses_map[student_id]
-    student_course_names = [x[0] for x in student_courses]
+    try: 
+        student_courses = id_courses_map[student_id]
+        student_course_names = [x[0] for x in student_courses]
+    except KeyError: 
+        print("Unable to find any student course. Transcript might be empty.")
+        sys.exit(1)
+
     # print(student_courses)
 
     print()
@@ -105,8 +125,21 @@ def single_student_courses(student_id):
 
     print("------------ Courses Not Yet Taken ------------------\n")
     for c in course_list: 
-        if c not in student_course_names: 
-            print(c)
+        already_taken = False 
+        for sc in student_course_names: 
+            code_part_sc = sc[:sc.index(':')]
+            code_part_c = c[:c.index(':')]
+            if code_part_sc == code_part_c: 
+                already_taken = True 
+                break 
+
+        if not already_taken: 
+            # print(c)
+            course_type, course_code, course_name = separate_number_chars(c)
+            course_full_name_formatted = course_type.ljust(5)
+            course_full_name_formatted += course_code.ljust(6)
+            course_full_name_formatted += course_name.ljust(33)
+            print(course_full_name_formatted)
 
 def student_courses():
     with open(os.path.join(output_dir, "tallies.csv"), 'w') as f: 

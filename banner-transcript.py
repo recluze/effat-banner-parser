@@ -1,4 +1,4 @@
-# Install dependencies: pip install lxml, pyyaml
+# Install dependencies: pip install lxml pyyaml
 
 import logging
 import sys

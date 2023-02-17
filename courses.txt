@@ -14,3 +14,39 @@ CS4166: Robotics
 CS4073: Analyzing and Visualizing Data
 CS3063: Web Security
 CS3061: Computer Network Security
+BIO112: Introduction to Biology
+CHEM113L: Principles of Chemistry
+GBIO171: Introduction to Life Sciences
+GMTH181A: Pre-Calulus A
+GMTH181B: Pre-Calulus B
+GMTH181E: Pre-Calulus E
+GMTH181H: Pre-Calulus H
+GPHY171: Foundation in Physics
+GSTA181: Elementary Statistics
+MATH101: Calculus I
+MATH127: Calculus I
+MATH128: Calculus II
+MATH160: Calculus for Business
+MATH201: Calculus II
+MATH203: Discrete Mathematics
+MATH307: Linear Algebra
+MATH321: Discrete Mathematics
+MATH322: Linear Algebra
+STAT321: Probabilistic Methods in Engineering
+GDRA111: Fund. of Drama & Theatre
+GISL121: Islam & Civil Society
+GISL122: 
+GARB131: Adv. Arabic Language Skills
+GENG131: Adv. English Language Skills
+GENG132: Academic Writing
+GFRN141: French I
+GFRN142: French II
+GGER141: German I
+GGER142: German II
+GITA141: Italian I
+GLAW151: 
+GPHL151: 
+GJOU151: 
+GMED151: 
+GSEM100: Research Seminar
+GSEM201: Research & Innovation
