@@ -5,7 +5,12 @@ import logging
 
 output_dir = "output"
 
-acceptable_codes = ['CS', 'GCS', 'GSTA', 'GGL0', 'BIO', 'GGER', 'GENG', 'MATH', 'GSEM', 'GPHY', 'GMTH', 'GISL', 'GECN', 'GFRN', 'GARB', 'GSEM', 'STAT', 'GCIV', 'GGLO', 'GDRA']
+acceptable_codes = ['CS', 'MATH', 'GCS', 'BIO', 'STAT', 
+                    'GSTA', 'GGL0', 'GGER', 'GENG', 'GSEM', 'GPHY', 
+                    'GMTH', 'GISL', 'GECN', 'GFRN', 'GARB', 'GPHL',  
+                    'GSTA', 'GCIV', 'GGLO', 'GDRA', 'GLAW', 
+                    'GJOU', 'GMED', 'GBIO' 
+                    ]
 
 def parse_table(student_id, student_name, root):
     out_csv = os.path.join(output_dir, "combined.csv")

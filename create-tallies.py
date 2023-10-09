@@ -107,14 +107,18 @@ def single_student_courses(student_id):
         course_grade = sc[1]
         course_fullname = sc[2]
 
+        suffix = ''
         if course_grade == 'F': 
             course_grade = 'F  <---'
+            suffix = ' (F)'
+
         if course_grade != 'None': 
             if output_plain: 
-                print(get_plan_formatted_course_name(course_name))
+                print(get_plan_formatted_course_name(course_name)  + suffix)
             else: 
                 print(course_fullname, course_grade)
             count += 1
+            
     print ("\nTotal: " + str(count) + "\n")
 
     count = 0
@@ -199,3 +203,7 @@ if __name__ == "__main__":
 
     infile = os.path.join(output_dir, "combined.csv")
     create_tallies(infile, student_id)     
+
+
+
+# python create-tallies.py  `cat ids-nauman.txt | head -n 20 | tail  -n 1 `  plain
