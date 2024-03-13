@@ -17,20 +17,35 @@ def parse_table(student_id, student_name, root):
     good_trs = []   # will collect data in this 
 
     all_trs = root.xpath("//tr")
+    current_semester = "" 
+
     for tr in all_trs: 
         tds = tr.xpath('td')
-
+       
+        
         useful_tr = False
         tr_data = [] 
+        term_text = ""
+
         for i, td in enumerate(tds): 
             if i == 0 and td.text in acceptable_codes: 
                 useful_tr = True 
 
             if useful_tr: 
                 tr_data.append(td.text)
+                # start edit 
+                term_span = tr.xpath('preceding-sibling::tr/th/span')
+                for ts in term_span: 
+                    if ts.text.startswith("Term:"): 
+                        term_text = ts.text[6:].replace("Semester ", "")
+
+                # end edit 
 
         if len(tr_data) > 0: 
+            tr_data.append(term_text)
             good_trs.append(tr_data)
+            
+            
 
     out_contents = ""    
     for tr in good_trs: 

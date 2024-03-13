@@ -58,9 +58,12 @@ def make_id_course_map(lines):
         if l[4] == 'Effat University Campus': 
             course_name = l[6]
             course_grade = l[7]
+            
         else: 
             course_name = l[4]
             course_grade = l[5]
+
+        term_name = l[-1]
 
         # if course_type[0] == 'G': 
         #     course_type = course_type[0] + " " + course_type[1:]
@@ -70,7 +73,7 @@ def make_id_course_map(lines):
         course_full_name_formatted += course_name.ljust(33)
         course_full_name = course_type + course_code + ": " + course_name
         
-        course_data = [course_full_name, course_grade, course_full_name_formatted]
+        course_data = [course_full_name, course_grade, course_full_name_formatted, term_name]
         if student_id not in id_courses_map: 
             id_courses_map[student_id] = [course_data]
         else: 
@@ -106,6 +109,7 @@ def single_student_courses(student_id):
         course_name = sc[0]
         course_grade = sc[1]
         course_fullname = sc[2]
+        course_term_name = sc[-1].strip()
 
         suffix = ''
         if course_grade == 'F': 
@@ -116,7 +120,7 @@ def single_student_courses(student_id):
             if output_plain: 
                 print(get_plan_formatted_course_name(course_name)  + suffix)
             else: 
-                print(course_fullname, course_grade)
+                print(course_fullname, course_grade.ljust(4), course_term_name)
             count += 1
             
     print ("\nTotal: " + str(count) + "\n")
