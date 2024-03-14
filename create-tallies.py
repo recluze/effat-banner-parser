@@ -15,6 +15,31 @@ id_name_map = {}
 id_courses_map = {} 
 course_list = [] 
 
+
+# we skip these in output 
+foundation_course_codes = ['EEW', 'EER', 'EELS', 'EECL', 'EEOE']
+
+exemption_rules = {
+    'GENG 131': ['EEW 015', 'EER 025', 'EELS 035', 'EECL 045', 'EEOE 094']
+}
+
+def calculate_exempted_courses(lines, student): 
+    print("----------- Courses Exempted ------------------------\n")
+    for item in exemption_rules.items():
+        exempted = item[0]
+        taken = item[1] 
+        # print("Checking exemption: " + exempted)
+
+        course_exempted = False  
+        for l in lines: 
+            this_course = l[2] + ' ' + l[3]
+            if this_course in taken: 
+                print("Course exempted: " + exempted + " - " + this_course)
+                break 
+        
+        
+
+
 def get_plan_formatted_course_name(course_name): 
     course_type, course_num, course_name = separate_number_chars(course_name) 
     return course_type + " " + course_num
@@ -55,6 +80,11 @@ def make_id_course_map(lines):
 
         course_type = l[2]
         course_code = l[3]
+
+        # ignore foundation courses from final output 
+        if course_type in foundation_course_codes: 
+            continue
+
         if l[4] == 'Effat University Campus': 
             course_name = l[6]
             course_grade = l[7]
@@ -196,6 +226,8 @@ def create_tallies(infile, student_id):
     get_course_list() 
     single_student_courses(student_id) 
     print() 
+    calculate_exempted_courses(lines, student_id) 
+    print() 
     
 if __name__ == "__main__": 
     student_id = sys.argv[1]
@@ -206,7 +238,9 @@ if __name__ == "__main__":
         pass 
 
     infile = os.path.join(output_dir, "combined.csv")
-    create_tallies(infile, student_id)     
+    create_tallies(infile, student_id)   
+
+ 
 
 
 

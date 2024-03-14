@@ -9,7 +9,9 @@ acceptable_codes = ['CS', 'MATH', 'GCS', 'BIO', 'STAT',
                     'GSTA', 'GGL0', 'GGER', 'GENG', 'GSEM', 'GPHY', 
                     'GMTH', 'GISL', 'GECN', 'GFRN', 'GARB', 'GPHL',  
                     'GSTA', 'GCIV', 'GGLO', 'GDRA', 'GLAW', 
-                    'GJOU', 'GMED', 'GBIO' 
+                    'GJOU', 'GMED', 'GBIO', 
+                    # foundations for waived off 
+                    'EEW', 'EER', 'EELS', 'EECL', 'EEOE'
                     ]
 
 def parse_table(student_id, student_name, root):
@@ -32,7 +34,11 @@ def parse_table(student_id, student_name, root):
                 useful_tr = True 
 
             if useful_tr: 
-                tr_data.append(td.text)
+                td_text = td.text
+                if td_text is not None: 
+                    td_text = td_text.replace(',', '')
+
+                tr_data.append(td_text)
                 # start edit 
                 term_span = tr.xpath('preceding-sibling::tr/th/span')
                 for ts in term_span: 
