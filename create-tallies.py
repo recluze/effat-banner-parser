@@ -27,17 +27,19 @@ def calculate_exempted_courses(lines, student):
     print("----------- Courses Exempted ------------------------\n")
     for item in exemption_rules.items():
         exempted = item[0]
-        taken = item[1] 
+        to_take = item[1] 
         # print("Checking exemption: " + exempted)
 
-        course_exempted = False  
+        courses_taken = [] 
         for l in lines: 
+            if l[0] != student: continue 
+
             this_course = l[2] + ' ' + l[3]
-            if this_course in taken: 
-                print("Course exempted: " + exempted + " - " + this_course)
-                break 
+            courses_taken.append(this_course)
         
-        
+        courses_left = [c for c in to_take if c not in courses_taken]
+        if not courses_left: 
+            print("Course exempted: " + exempted)
 
 
 def get_plan_formatted_course_name(course_name): 
