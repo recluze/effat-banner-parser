@@ -173,23 +173,25 @@ def single_student_courses(student_id):
             count += 1
     print ("\nTotal: " + str(count) + "\n")
 
-    print("------------ Courses Not Yet Taken ------------------\n")
-    for c in course_list: 
-        already_taken = False 
-        for sc in student_course_names: 
-            code_part_sc = sc[:sc.index(':')]
-            code_part_c = c[:c.index(':')]
-            if code_part_sc == code_part_c: 
-                already_taken = True 
-                break 
+    print("------------ Can Take ------------------\n")
+    # for c in course_list: 
+    #     already_taken = False 
+    #     for sc in student_course_names: 
+    #         code_part_sc = sc[:sc.index(':')]
+    #         code_part_c = c[:c.index(':')]
+    #         if code_part_sc == code_part_c: 
+    #             already_taken = True 
+    #             break 
 
-        if not already_taken: 
-            # print(c)
-            course_type, course_code, course_name = separate_number_chars(c)
-            course_full_name_formatted = course_type.ljust(5)
-            course_full_name_formatted += course_code.ljust(6)
-            course_full_name_formatted += course_name.ljust(33)
-            print(course_full_name_formatted)
+    #     if not already_taken: 
+    #         # print(c)
+    #         course_type, course_code, course_name = separate_number_chars(c)
+    #         course_full_name_formatted = course_type.ljust(5)
+    #         course_full_name_formatted += course_code.ljust(6)
+    #         course_full_name_formatted += course_name.ljust(33)
+    #         print(course_full_name_formatted)
+    get_can_take_courses(student_courses)
+
 
 def student_courses():
     with open(os.path.join(output_dir, "tallies.csv"), 'w') as f: 
@@ -231,6 +233,152 @@ def create_tallies(infile, student_id):
     calculate_exempted_courses(lines, student_id) 
     print() 
     
+
+def remove_letter_from_course_number(course_num): 
+    regex = r"([A-Z]*\s\d+)[A-Z]?"
+    match = re.search(regex, course_num) 
+    if match != None: 
+        return match.group(1)
+    else: 
+        print("Bad course number:", course_num)
+        sys.exit(1)
+
+def get_can_take_courses(student_courses): 
+    try: 
+        output_suggested = sys.argv[2] == 'suggest'
+        suggest_for_future_sem = sys.argv[2] == 'suggest-for-future-sem'
+    except IndexError: 
+        print('Use suggest or suggest-for-future-sem to get suggestions')
+        return 
+    
+    if not suggest_for_future_sem and not output_suggested:
+        print('Use suggest or suggest-for-future-sem to get suggestions')
+        return 
+
+
+    print("Core Courses: \n")
+    prereqs_core = {
+        'CS 3121': ['GCS 182'], 
+        'MATH 101': ['GMTH 181E'], 
+        'GENG 132': ['GENG 131'],
+        'CS 1021': ['CS 1001'],
+        'CS 2071': ['GCS 182'],
+        'CS 2011': ['CS 2132'],
+        'MATH 201': ['MATH 101'],
+        'CS 1021': ['CS 1021'], 
+        'CS 2111': ['CS 2071'], 
+        'CS 3151': ['CS 2011'],
+        'CS 3081': ['GSTA 181', 'CS 2011'], 
+        'STAT 201': ['GSTA 181', 'MATH 201'], 
+        'CS 3067': ['CS 1001'], 
+        'MATH 203': ['MATH 201'],
+        'CS 3101': ['CS 1021', 'CS 2011'],
+        'GSEM 201': ['GSEM 100'],
+        'MATH 307': ['MATH 201'], 
+        'CS 3072': ['CS 2071'], 
+        'CS 4176': ['CS 3151'], 
+        'CS 4177': ['CS 4176'],
+        'CS 4121': ['CS 3101'], 
+        'MATH 310': ['MATH 201', 'CS 2132'], 
+        'CS 3133': ['CS 2132']
+    }
+
+    # for use later in the function 
+    course_types = {
+        'AI Electives': [['CS 4082', 'CS 4083'], 5], 
+
+        'CyberSec Electives': [['CS 3154', 'CS 4065', 'CS 4064'], 5],
+
+        'Foreign1':  [['GFRN 141', 'GGER 141', 'GFRN 142', 'GGER 142'], 2], 
+
+        'Social1': [['GLAW 151','GPSY 151','GPSY 152','GDIP 151','GANT 151','GJMC 151','GHIS 151','GARC 151','GECO 151','GPHL 151','GMED 151','GCIV 151','GCIV 161','GENV 162','GCUL 161','GGLO 161','GENT 161','GGLO 162','GSUS 161'], 2], 
+    
+        'Creative': [['GDRA 111', 'GDRW 111', 'GFIL 111', 'GMUS 111', 'GART 111', 'GPHO 111', 'GLIT 111', 'GLIT 112', 'GLIT 113', 'GLIT 114','GISL 121', 'GISL 122',  'GISL 123', 'GISL 124', 'GISL 125'], 1], 
+
+        'No Prereq Courses': [['CS 1001', 'GMTH 181', 'GCS 182', 'GENG 131', 'GISL 121', 
+                              'GSTA 181', 'GARB 131', 
+                              'GETH 121', 'GPHY 171', 
+                              'GSEM 100'], 10]
+        }
+
+
+    courses_taken = []
+    courses_currently_taking = []
+
+    for sc in student_courses:
+        course_name = sc[0]
+        course_grade = sc[1]
+        course_fullname = sc[2]
+        course_code = get_plan_formatted_course_name(course_name)
+
+        if course_grade != 'None': 
+            courses_taken.append(course_code)
+        else: 
+            courses_currently_taking.append(course_code)    
+
+    # print("Courses Taken: ", courses_taken)
+    # update courses_taken to remove letter from after the course number if any 
+    courses_taken = [remove_letter_from_course_number(c) for c in courses_taken]
+    courses_currently_taking = [remove_letter_from_course_number(c) for c in courses_currently_taking]
+    
+    collected_courses = [] 
+    for sc in student_courses:
+        course_taken = get_plan_formatted_course_name(sc[0])
+        
+        for course, reqs in prereqs_core.items():
+            # If we are in mid of semester, assume current courses will be cleared
+            if not suggest_for_future_sem and course_taken in courses_currently_taking:
+                continue; 
+
+            # If we are at beginning of semester, current courses are taken already 
+            # but not yet cleared. Don't need to suggest them. 
+            # Also, can't suggest a course whose prereq is being taken currently.
+            if course_taken in reqs and \
+                course not in courses_taken and \
+                course not in courses_currently_taking:
+                collected_courses.append([course, reqs]) 
+
+    for cc in collected_courses:
+        # ensure all prereqs are taken 
+        prereqs = cc[1]
+        can_take = False  
+        for p in prereqs:
+            if (p in courses_taken) or (suggest_for_future_sem and p in courses_currently_taking): 
+                can_take = True 
+            else: 
+                can_take = False # need this to handle multiple prereqs
+                break # a single missed prereq is enough to not suggest the course
+                    
+        if can_take:
+            print(cc[0] + "  (Prereqs:" + ', '.join(prereqs) + ")")
+
+    print("-" * 10 + "\n")
+    # -------- Now suggest elective courses not yet taken
+    # course_types defined above. 
+
+    # for these, doesn't matter if currently taking or cleared already 
+    for course_type, course_type_courses_meta in course_types.items(): 
+        course_type_courses = course_type_courses_meta[0]
+        required_count = course_type_courses_meta[1]
+
+        print()  
+        course_type_count = 0 
+        for sug in course_type_courses:
+            if sug in courses_taken or sug in courses_currently_taking:
+                course_type_count += 1
+                
+        # if sufficient number of courses not taken, suggest all not yet taken
+        course_type_suggested = [] 
+        if course_type_count < required_count:
+            for sug in course_type_courses: 
+                if sug not in courses_taken and sug not in courses_currently_taking:
+                    course_type_suggested.append(sug)
+            print(course_type + " Courses: " + \
+                  " ["+ str(required_count - course_type_count) +"]", \
+                      course_type_suggested)
+        else: 
+            print(course_type + " Courses: Sufficient courses taken already.")
+
 if __name__ == "__main__": 
     student_id = sys.argv[1]
 

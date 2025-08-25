@@ -11,6 +11,7 @@ acceptable_codes = ['CS', 'MATH', 'GCS', 'BIO', 'STAT',
                     'GSTA', 'GCIV', 'GGLO', 'GDRA', 'GLAW', 
                     'GJOU', 'GMED', 'GBIO', 
                     'GLIT', 
+                    'GETH', 
                     # foundations for waived off 
                     'EEW', 'EER', 'EELS', 'EECL', 'EEOE'
                     ]
