@@ -18,7 +18,7 @@ username = config['username']
 password = config['password']
 term_identifier = config['term_identifier']
 
-cooloff_time = 2
+cooloff_time = 1
 
 
 output_dir = "output"
