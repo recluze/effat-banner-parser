@@ -10,8 +10,12 @@ acceptable_codes = ['CS', 'MATH', 'GCS', 'BIO', 'STAT',
                     'GMTH', 'GISL', 'GECN', 'GFRN', 'GARB', 'GPHL',  
                     'GSTA', 'GCIV', 'GGLO', 'GDRA', 'GLAW', 
                     'GJOU', 'GMED', 'GBIO', 
-                    'GLIT', 
+                    'GLIT', 'GPHO', 'GCUL', 
+                    'GFIL', 'GHEW', 'GITA', 'GHIS', 'GWEB', 'GECO', 
+                    'GANT', 'GPSY', 'GARC', 'GDIP', 'DMCC', 
                     'GETH', 
+                    # bad but should still show 
+                    'CHEM', 
                     # foundations for waived off 
                     'EEW', 'EER', 'EELS', 'EECL', 'EEOE'
                     ]
@@ -32,8 +36,12 @@ def parse_table(student_id, student_name, root):
         term_text = ""
 
         for i, td in enumerate(tds): 
-            if i == 0 and td.text in acceptable_codes: 
-                useful_tr = True 
+            if i == 0:
+                if td.text in acceptable_codes: 
+                    useful_tr = True
+                # elif td.text is not None and td.text.strip() != "" and td.text != "AMB" and td.text[:1] == 'G': 
+                elif td.text is not None and td.text.strip() != "" and td.text != "AMB" and td.text != 'Good Standing': 
+                    print("Ignoring: ", td.text) 
 
             if useful_tr: 
                 td_text = td.text
@@ -109,5 +117,8 @@ if __name__ == "__main__":
     list_filename = sys.argv[1]
     student_id_list = get_student_list(list_filename)
     for student_id in student_id_list: 
-        parse_transcript_html(student_id)
+        try: 
+            parse_transcript_html(student_id)
+        except Exception as e: 
+            logging.error(f"Error processing student ID {student_id}: {e}")
         

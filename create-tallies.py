@@ -287,9 +287,9 @@ def get_can_take_courses(student_courses):
     course_types = {
         'AI Electives': [['CS 4082', 'CS 4083'], 5], 
 
-        'CyberSec Electives': [['CS 3154', 'CS 4065', 'CS 4064'], 5],
+        'CyberSec Electives': [['CS 3154', 'CS 4065', 'CS 4064', 'CS 3061'], 5],
 
-        'Foreign1':  [['GFRN 141', 'GGER 141', 'GFRN 142', 'GGER 142'], 2], 
+        'Foreign1':  [['GFRN 141', 'GGER 141', 'GFRN 142', 'GGER 142', 'GFRN 181', 'GFRN 182'], 2], 
 
         'Social1': [['GLAW 151','GPSY 151','GPSY 152','GDIP 151','GANT 151','GJMC 151','GHIS 151','GARC 151','GECO 151','GPHL 151','GMED 151','GCIV 151','GCIV 161','GENV 162','GCUL 161','GGLO 161','GENT 161','GGLO 162','GSUS 161'], 2], 
     

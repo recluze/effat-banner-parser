@@ -18,7 +18,7 @@ username = config['username']
 password = config['password']
 term_identifier = config['term_identifier']
 
-cooloff_time = 1
+cooloff_time = 0
 
 
 output_dir = "output"
@@ -36,6 +36,9 @@ url_view_transcript = url_prefix + "/ssbprod/bwlkftrn.P_ViewTran"
 driver = None
 
 
+
+class TermException(Exception):
+    pass
 
 
 def login(username, password): 
@@ -94,8 +97,10 @@ def select_student(student_id, cookies):
                         verify=False,
                         cookies=cookies)
     if "is the name of the student" not in r.text: 
-        logging.error("Unable to select student!")
-        sys.exit("TERM FAILURE")   
+        print(r.text) 
+        logging.error("Unable to select student ... ! ")
+        # sys.exit("TERM FAILURE")   
+        raise TermException("Student ID " + student_id + " not found!")
 
     logging.debug(r.text)
     raw_html = html.fromstring(r.text)
@@ -127,7 +132,7 @@ def select_student(student_id, cookies):
     return cookies 
 
 
-def get_transcript(cookies):
+def get_transcript(cookies, student_id):
     logging.info("Selecting Transcript ...")
     r = requests.get(url=url_transcript, 
                         verify=False,
@@ -136,7 +141,8 @@ def get_transcript(cookies):
     logging.debug(r.text)
     if "select a transcript level" not in r.text: 
         logging.error("Unable to get transcript page!")
-        sys.exit("Transcript Page FAILURE")   
+        # sys.exit("Transcript Page FAILURE")   
+        raise TermException("Transcript page not found!")
 
 
 
@@ -168,7 +174,7 @@ def get_transcript(cookies):
 def get_transcript_process(student_id): 
     cookies = login(username, password) 
     cookies = select_student(student_id, cookies) 
-    cookies = get_transcript(cookies) 
+    cookies = get_transcript(cookies, student_id) 
     
 
 # def install_driver():
@@ -212,9 +218,14 @@ if __name__ == "__main__":
     
     student_id_list = get_student_list(list_filename)
 
-    for student_id in student_id_list: 
-        logging.info("Getting Transcript for: " + student_id)
-        get_transcript_process(student_id)
+    for idx, student_id in enumerate(student_id_list): 
+        try:
+            logging.info("Getting Transcript for: " + student_id + " (" + str(idx+1) + " of " + str(len(student_id_list)) + ")")
+            get_transcript_process(student_id)
+            
+        except TermException as e:
+            logging.error(f"Error processing student ID {student_id}: {e}")
+    
         logging.info(" - x - ")
         logging.info("Cooling off for " + str(cooloff_time) + "s...")
         time.sleep(cooloff_time)
