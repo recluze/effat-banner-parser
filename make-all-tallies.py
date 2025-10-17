@@ -6,14 +6,14 @@ from shutil import copyfile
 from openpyxl import load_workbook
 
 output_file = "all-suggested-courses.csv"
-transcript_dir = "plain"
+transcript_dir = "audit-support-files"
 max_suggested_courses = 6
 courses_after_which_senior_1 = 30  
 
 # set logging level to info 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 # disable logging 
-logging.disable(logging.CRITICAL)
+logging.disable(logging.WARNING)
 
 
 # plan file wrting 
@@ -25,6 +25,10 @@ plan_sheet_main_id = 0
 plan_taken_range = ['A', '4']
 plan_taking_range = ['F', '4']
 plan_suggested_range = ['Q', '5']
+plan_category_cells = [['B', '10'], ['I', '7'], ['B', '20'], ['I', '21'], ['B', '26'], ['I', '26'], 
+                       ['B', '30'], ['I', '30'], ['I', '31'], ['I', '45'], ['I', '46']  ]  # to be filled later
+plan_english_2_cell = 'I7'
+plan_gmth_181_cell = 'B6'
 
 study_plan = [
     # Semester 1
@@ -94,9 +98,11 @@ category_courses_codes = {
     'Foreign': ['GFRN', 'GGER', 'GITA', 'GSPA'],
     'Creative': ['GDRA', 'GDRW', 'GFIL', 'GMUS', 'GART', 'GPHO', 'GLIT', 'GISL'], # need to remove GISL 121 before checking this 
     'Science': ['BIO', 'CHEM'],
-    'Tech': ['CS 3069', 'CS 4064', 'CS 4065'  
+    # TODO: confirm these tech codes 
+    'Tech': ['CS 3069', 'CS 4064', 'CS 4065', 'CS 3093', 
              'CS 4082', 'CS 4083', 'CS 4084', 'CS 4073', 'CS 4086', 
-            ], # Need to check these specifically with code TODO: Fix 
+             'CS 2171' # this is a special case, considered as tech course 
+            ], 
 } 
 # when checking "Social 2" for example, 2 of these need to have been taken 
 
@@ -144,15 +150,19 @@ def get_all_suggested_courses(ids):
     # add header to the output file 
     add_output_header(output_file)
 
-
     for student_id in ids:
-        
+        # TODO: for testing only
+        # student_id = "S21106991" 
+
         logging.info(f"Processing student ID: {student_id}")
         try: 
             taken_courses, taking_courses = get_student_taken_courses(student_id)
             # merge the two lists for sending to the suggestion function
             all_taken_courses = list(set(taken_courses) | set(taking_courses))
             logging.info(f"Taken courses for student {student_id}: {all_taken_courses}")  
+
+            if len(all_taken_courses) == 0:
+                logging.error(f"No taken or taking courses found for student {student_id}. This seems strage.")
 
             # get suggested courses
             suggested_courses = get_student_suggested_courses(student_id, all_taken_courses) 
@@ -163,11 +173,13 @@ def get_all_suggested_courses(ids):
             # write to study plan file 
             populate_plan_file(student_id, taken_courses, taking_courses, suggested_courses)
 
-            print("===================================")
-            print(student_id)
-            for course in suggested_courses:
-                print(course)
+            # print("===================================")
+            # print(student_id)
+            # for course in suggested_courses:
+            #     print(course)
             
+            # TODO: remove later 
+            # break 
                 
         except FileNotFoundError as e:
             logging.error(e)    
@@ -177,7 +189,7 @@ def get_all_suggested_courses(ids):
 
 def get_student_taken_courses(student_id):
     # files in the transcript_dir that start with first-last-id.txt. Get the filename using student_id and glob 
-    glob_pattern = os.path.join(transcript_dir, f"*{student_id}*.txt")
+    glob_pattern = os.path.join(transcript_dir, f"*{student_id}-plain.txt")
     student_file  = glob.glob(glob_pattern)   
 
     if not student_file:
@@ -220,11 +232,21 @@ def get_student_taken_courses(student_id):
                 elif collecting_taking:
                     taking_courses.append(line)
 
+    update_exceptions_in_taken_courses(taken_courses, taking_courses)
+
     return taken_courses, taking_courses 
 
-def get_student_suggested_courses(student_id, taken_courses):
-    suggested_courses = []
 
+def update_exceptions_in_taken_courses(taken_courses, taking_courses):
+    # replace in both lists 
+    for list_type in [taken_courses, taking_courses]:
+        for i, course in enumerate(list_type):
+            if course == 'CS 1131': 
+                list_type[i] = 'CS 4121'
+            if course == 'CS 2171':
+                pass # Get first free Tech course and replace it 
+
+def add_exceptional_courses(taken_courses, suggested_courses):
     # TODO: Check Ethics GETH 121. If osmething, then somethign 
 
     # Check the number of courses. If up to X and not already taken, add Senior 1 
@@ -235,6 +257,21 @@ def get_student_suggested_courses(student_id, taken_courses):
     if 'CS 4176' in taken_courses and 'CS 4177' not in taken_courses:
         suggested_courses.append('CS 4177')
 
+def is_post_req_taken(check_course, taken_courses):
+    if check_course == 'GENG 131':
+        if 'GENG 132' in taken_courses or 'GENG 133' in taken_courses:
+            return True
+    if check_course == 'GMTH 181E':
+        if 'MATH 101' in taken_courses:
+            return True
+
+def get_student_suggested_courses(student_id, taken_courses):
+    suggested_courses = []
+
+    # add exception cases separately 
+    add_exceptional_courses(taken_courses, suggested_courses)
+
+
     # loop through all courses in plan. See if the course is already in taken_courses. If so, skip it. 
     for check_course_meta in study_plan: 
         check_course = list(check_course_meta.keys())[0]
@@ -243,6 +280,11 @@ def get_student_suggested_courses(student_id, taken_courses):
         # skip already taken courses 
         if check_course in taken_courses:
             logging.info(f"Course {check_course} already taken. Skipping.")
+            continue
+
+        # skip pre-requisites if already taken post-requisite
+        if is_post_req_taken(check_course, taken_courses):
+            logging.info(f"Post-requisite for course {check_course} already taken. Skipping.")
             continue
 
         # Check "cateogory courses" like Social 1, Tech 1, Foreign 1, Creative 1
@@ -377,11 +419,84 @@ def populate_plan_file(student_id, taken_courses, taking_courses, suggested_cour
     for i, course in enumerate(suggested_courses):
         cell =  f"{plan_suggested_range[0]}{int(plan_suggested_range[1]) + i}"
         ws_main[cell] = course
+
+    # Update the specific courses in the plan 
+    update_courses_in_plan(ws_main, taken_courses, taking_courses)
     
     # save the workbook
     wb.save(output_file_path)
     wb.close()
     logging.info(f"Populated plan file saved to {output_file_path}")
+
+
+
+def update_courses_in_plan(ws_main, taken_courses, taking_courses): 
+    all_courses = taken_courses + taking_courses
+    # loop over all courses and see if they are one of the "category courses".  
+    for course in all_courses: 
+        # check if course is a caterogy course 
+        if course == 'GISL 121': continue # GISL 121 is excluded from Creative category
+
+        # Hard code English 2 check
+        if course.startswith('GENG 132') or course.startswith('GENG 133'):
+             ws_main[plan_english_2_cell] = course
+             continue 
+        
+        # Hard code GMTH181B Check 
+        if course.startswith('GMTH 181'):
+            ws_main[plan_gmth_181_cell] = course
+            continue
+        
+
+        done_with_course = False 
+
+        # Do other categories 
+        for category, codes in category_courses_codes.items():
+            if category != "Tech": 
+                # check if this course starts with any of the codes
+                for code in codes:
+                    
+
+                    if course.startswith(code):
+                        # find the corresponding cell in plan_category_cells
+                        for cell in plan_category_cells:
+                            cell_column, cell_row = cell[0],  int(cell[1])
+                            
+                            # check if the cell value starts with this category
+                            cell_value = ws_main[f"{cell_column}{cell_row}"].value
+                            if cell_value and cell_value.startswith(category):
+                                # update the cell with the course code
+                                ws_main[f"{cell_column}{cell_row}"] = course
+                                logging.info(f"Updated cell {cell_column}{cell_row} with course {course}")
+
+                                done_with_course = True
+                                break 
+                            
+                    if done_with_course:
+                        break  # no need to check other codes for this course
+
+                else:
+                    # Tech courses here 
+                    # check if one of tech X courses
+                    logging.info(f"Checking for tech courses {course}")
+                    if course in category_courses_codes['Tech']:
+                        for cell in plan_category_cells:
+                            cell_column, cell_row = cell[0],  int(cell[1])
+                            
+                            # check if the cell value starts with "Tech"
+                            cell_value = ws_main[f"{cell_column}{cell_row}"].value
+                            if cell_value and cell_value.startswith("Tech"):
+                                # update the cell with the course code
+                                ws_main[f"{cell_column}{cell_row}"] = course
+                                logging.info(f"Updated cell {cell_column}{cell_row} with tech course {course}")
+
+                                done_with_course = True
+                                break  # no need to check other cells for this course
+
+                if done_with_course:
+                    break
+        
+            
 
 if __name__ == "__main__":
     # get ids file from arguments 
